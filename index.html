@@ -348,7 +348,7 @@ header.top{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 <div id="overlayroot"></div>
 
 <script>
-const APP_VERSION="v2";
+const APP_VERSION="v3";
 const FEEDBACK_EMAIL="fernlabsbuild@gmail.com";
 const DEFAULT_CFG={"v":2,"u":0,"setupDone":false,"profile":{"name":""},"mods":{"schedule":true,"sleep":true,"rewards":true,"goals":true,"markets":false},"dayStart":240,"habits":[],"week":[[],[],[],[],[],[],[]],"goals":[],"manual":{},"sleep":{"bed":"23:00","hours":8,"window":30}};
 /* storage keys: kept apart from the personal app, which shares the same origin */
@@ -356,9 +356,9 @@ const EXPORT_ID="level-up";
 const SK={log:"lu-log",cfg:"lu-config",meta:"lu-meta",range:"lu-range",report:"lu-report",theme:"lu-theme"};
 const GROUPS=[["morning","Morning"],["body","Body & mind"],["craft","Learn & create"],["night","Evening"]];
 const GCOL={morning:"--g-morning",body:"--g-body",craft:"--g-craft",night:"--g-night"};
-const CATS={ritual:"Routines",work:"Work / classes",focus:"Focus & study",fitness:"Exercise & movement",creative:"Creative practice",learn:"Reading & learning",rest:"Rest & self-care",social:"Family & friends",life:"Meals, commute, free time",markets:"Markets",sleep:"Sleep"};
+const CATS={ritual:"Routines",work:"Work / classes",focus:"Focus & study",fitness:"Exercise & movement",creative:"Creative practice",learn:"Reading & learning",rest:"Rest & self-care",social:"Family & friends",life:"Meals, commute, free time",sleep:"Sleep"};
 const NOSKIP=["sleep","work","life","social"];/* areas left out of "blocks you skip most" */
-const MODULES=[["schedule","Daily schedule","Time blocks with a live Now / Next card. Ticking a block ticks its linked habits."],["sleep","Sleep log","Log bed and wake times; it scores itself against your sleep target."],["rewards","XP, levels & rewards","Earn XP for habits, level up skills and spend coins in a reward shop you set up."],["goals","Big goals","Long-term targets such as hours studied or books finished, with weekly pace."],["markets","Markets check-in","For traders: trades, P&L and whether you kept your rules, compared with your habits."]];
+const MODULES=[["schedule","Daily schedule","Time blocks with a live Now / Next card. Ticking a block ticks its linked habits."],["sleep","Sleep log","Log bed and wake times; it scores itself against your sleep target."],["rewards","XP, levels & rewards","Earn XP for habits, level up skills and spend coins in a reward shop you set up."],["goals","Big goals","Long-term targets such as hours studied or books finished, with weekly pace."]];
 const MOD_DEF={schedule:true,sleep:true,rewards:true,goals:true,markets:false};
 const on=m=>!!(CFG.mods&&CFG.mods[m]);
 const REASONS=["Sick","Travel","Busy","Rest day","Other"];
@@ -477,7 +477,7 @@ function normalize(c){if(!Array.isArray(c.habits))c.habits=[];if(!Array.isArray(
   c.sleep=Object.assign({bed:"23:00",hours:8,window:30},c.sleep||{});
   if(!Array.isArray(c.rewards))c.rewards=clone(DEFAULT_REWARDS);if(!Array.isArray(c.redeemed))c.redeemed=[];
   c.game=Object.assign({trade:25,perfect:50,morning:20},c.game||{});
-  c.mods=Object.assign({},MOD_DEF,c.mods||{});c.profile=Object.assign({name:""},c.profile||{});
+  c.mods=Object.assign({},MOD_DEF,c.mods||{});c.mods.markets=false;/* trading check-in is not offered in the public app */c.profile=Object.assign({name:""},c.profile||{});
   if(c.dayStart==null)c.dayStart=240;return c}
 function levelFrom(xp,base,inc){let L=1,need=base;xp=Math.max(0,xp);while(xp>=need){xp-=need;L++;need=base+inc*(L-1)}return {L,into:xp,need}}
 const titleFor=(L,T)=>T.filter(t=>L>=t[0]).pop()[1];
@@ -1014,7 +1014,7 @@ function renderEdit(){
     <label><span class="lbl">Start</span><input type="time" data-b="s" value="${hhmm(b.s)}"></label>
     <label><span class="lbl">End</span><input type="time" data-b="e" value="${hhmm(b.e)}"></label>
     <label><span class="lbl">Block</span><input data-b="t" value="${esc(b.t)}" maxlength="70"></label>
-    <label><span class="lbl">Area</span><select data-b="c">${Object.entries(CATS).filter(([c])=>c!=="markets"||on("markets")||b.c==="markets").map(([c,l])=>`<option value="${c}"${b.c===c?" selected":""}>${l}</option>`).join("")}</select></label>
+    <label><span class="lbl">Area</span><select data-b="c">${Object.entries(CATS).map(([c,l])=>`<option value="${c}"${b.c===c?" selected":""}>${l}</option>`).join("")}</select></label>
     ${H().length?`<div class="linkpick" role="group" aria-label="Habits this block ticks"><span class="lbl" style="align-self:center;margin-right:4px">Ticks</span>${H().map(x=>`<button data-link="${x.k}" aria-pressed="${(b.l||[]).includes(x.k)}">${esc(x.l)}</button>`).join("")}</div>`:""}</div>
     <div class="side"><button data-bdel aria-label="Delete block">✕</button></div></div>`});
   h+=`<div class="edfoot"><button class="btn primary" id="addB">+ Add block</button><button class="btn" id="copyB"${W.length?"":" disabled"}>Copy ${DOWL[edDay]} to…</button><span id="copyto"></span></div></div>`}
