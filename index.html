@@ -296,6 +296,13 @@ button.chip{cursor:pointer}a.chip{text-decoration:none;color:inherit;cursor:poin
 .norw .er .f.hf{grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,.9fr)}
 @media (max-width:700px){.norw .er .f.hf{grid-template-columns:1fr 1fr}}
 #helpBtn{font-weight:700;width:30px;justify-content:center;padding:4px 0}
+header.top{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.titlebar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.fbchip{flex:none;margin-top:4px;border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:500}
+@media (max-width:430px){#synctext{display:none}#sync{padding:4px 8px}}
+.fbtypes{display:flex;gap:6px;flex-wrap:wrap}.fbtypes button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 13px;font-size:13.5px;cursor:pointer}
+.fbtypes button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.fbaddr{font-family:var(--f-mono);font-size:13px;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:9px 12px;word-break:break-all}
 .wiz{position:fixed;inset:0;z-index:70;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
 .wizcard{width:100%;max-width:560px;display:flex;flex-direction:column;margin:auto 0}
 .wzhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
@@ -331,7 +338,7 @@ button.chip{cursor:pointer}a.chip{text-decoration:none;color:inherit;cursor:poin
   </nav>
 <div class="scroller" id="scroller"><div class="wrap">
   <header class="top">
-    <div><h1>Level Up</h1><div class="muted" style="font-size:13px" id="subtitle"></div></div>
+    <div class="titlebar"><div><h1>Level Up</h1><div class="muted" style="font-size:13px" id="subtitle"></div></div><button class="chip fbchip" id="fbBtn" aria-label="Send feedback" title="Send feedback"><span aria-hidden="true">✉</span><span>Feedback</span></button></div>
     <div class="chips"><a class="chip" href="#rewards" id="xpLink" title="Level, coins and rewards"><span aria-hidden="true">🏆</span><span id="points">Lv 1</span></a><button class="chip" id="themeBtn" aria-label="Switch theme"></button><button class="chip" id="helpBtn" aria-label="Take the tour" title="Take the tour">?</button><span class="chip" id="sync" title="Everything is saved on this phone only"><span class="dot"></span><span id="synctext">Saved</span></span></div>
   </header>
 
@@ -341,8 +348,8 @@ button.chip{cursor:pointer}a.chip{text-decoration:none;color:inherit;cursor:poin
 <div id="overlayroot"></div>
 
 <script>
-const APP_VERSION="v1";
-const FEEDBACK_URL="https://github.com/fernbuilds-labs/levelup-app/issues";
+const APP_VERSION="v2";
+const FEEDBACK_EMAIL="fernlabsbuild@gmail.com";
 const DEFAULT_CFG={"v":2,"u":0,"setupDone":false,"profile":{"name":""},"mods":{"schedule":true,"sleep":true,"rewards":true,"goals":true,"markets":false},"dayStart":240,"habits":[],"week":[[],[],[],[],[],[],[]],"goals":[],"manual":{},"sleep":{"bed":"23:00","hours":8,"window":30}};
 /* storage keys: kept apart from the personal app, which shares the same origin */
 const EXPORT_ID="level-up";
@@ -1075,9 +1082,9 @@ function renderSync(){const m=meta();
   <div class="card pad"><h3>Restore or move phones</h3><p class="sub" style="margin:4px 0 12px">Pick a Level Up backup file. Days merge and the most recent edit wins, so nothing you've logged here is deleted.</p><label class="btn" for="importFile" style="display:inline-block">Choose backup file…</label><input type="file" id="importFile" accept=".json,application/json" hidden><p class="sub" id="importMsg" style="margin-top:10px" role="status"></p></div></div>
   <p class="sub" style="margin-top:12px">Last export: ${stamp(m.exp)} · last import: ${stamp(m.imp)}. A weekly backup is plenty. Deleting the app from your home screen deletes its data, so export first.</p>
   <div class="two" style="margin-top:16px"><div class="card pad"><h3>New here?</h3><p class="sub" style="margin:4px 0 12px">A one-minute tour of the main screens. You can also tap <b>?</b> at the top any time.</p><button class="btn" id="tourBtn">Take the tour</button></div>
-  <div class="card pad"><h3>Feedback</h3><p class="sub" style="margin:4px 0 12px">Found a bug or have an idea? I read everything.</p><a class="btn" id="feedbackBtn" href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">Send feedback</a></div></div>
+  <div class="card pad"><h3>Feedback</h3><p class="sub" style="margin:4px 0 12px">Found a bug or have an idea? It comes straight to my inbox, and I read every message.</p><button class="btn" id="feedbackBtn">Send feedback</button></div></div>
   <p class="sub" style="margin-top:16px;text-align:center" id="verLine">Level Up ${APP_VERSION} · works offline · no account, no tracking</p>`;
-  q("#exportBtn").onclick=doExport;q("#importFile").onchange=doImport;q("#tourBtn").onclick=()=>startTour()}
+  q("#exportBtn").onclick=doExport;q("#importFile").onchange=doImport;q("#tourBtn").onclick=()=>startTour();q("#feedbackBtn").onclick=openFeedback}
 async function doExport(){const msg=q("#exportMsg");const name=`level-up-backup-${keyOf(new Date())}.json`;
   const body=JSON.stringify({app:EXPORT_ID,version:2,appVersion:APP_VERSION,exported:new Date().toISOString(),config:CFG,log:LOG});const n=Object.keys(LOG).length;
   try{await shareOrDownload(name,new Blob([body],{type:"application/json"}));setMeta({exp:Date.now()});msg.textContent=`Exported ${n} day${n===1?"":"s"}. Save it somewhere safe, like Files or iCloud Drive.`}
@@ -1243,6 +1250,26 @@ function renderWizard(){const root=document.getElementById("overlayroot");const 
     const tour=WZ.tour&&!WZ.rerun;applySetup(WZ);closeWizard();location.hash="#today";route();toast(tour?"You're set up":"Setup saved");if(tour)setTimeout(()=>startTour(),350)};
   const first=$("#wzName")||root.querySelector('[aria-checked="true"]')||$("#wzNext");try{first.focus({preventScroll:true})}catch(e){}}
 
+/* ---------- feedback (email) ---------- */
+function deviceLine(){const ua=navigator.userAgent;const os=/iPhone|iPad|iPod/.test(ua)?"iPhone/iPad":/Android/.test(ua)?"Android":/Mac/.test(ua)?"Mac":/Windows/.test(ua)?"Windows":"Other";
+  const inst=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone?"installed app":"browser";return `${os} · ${inst}`}
+function openFeedback(){const root=document.getElementById("sheetroot");let type="Idea";
+  const types=[["Idea","💡 Idea"],["Bug","🐞 Something's broken"],["Love","❤️ What I like"],["Other","Other"]];
+  const mail=()=>{const subj=`Level Up feedback: ${type}`;const body=`\n\n\n— — —\nLevel Up ${APP_VERSION} · ${deviceLine()}\n(Feel free to delete this line.)`;
+    return `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`};
+  root.innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="fb-t"><span class="grab"></span>
+   <div><h3 id="fb-t">Send feedback</h3><p class="sub" style="margin-top:2px">Bugs, ideas, or what you enjoy. It comes straight to my inbox, and I read every message.</p></div>
+   <div class="fbtypes" role="group" aria-label="Type of feedback">${types.map(([k,l])=>`<button data-fbt="${k}" aria-pressed="${k===type}">${l}</button>`).join("")}</div>
+   <a class="btn primary" id="fbMail" href="${esc(mail())}" style="text-align:center;text-decoration:none;padding:11px">Write an email</a>
+   <div><div class="sub" style="margin-bottom:6px">No mail app? Copy the address instead:</div><div class="row" style="flex-wrap:nowrap"><span class="fbaddr" id="fbAddr">${esc(FEEDBACK_EMAIL)}</span><button class="btn" id="fbCopy">Copy</button></div></div>
+   <div class="row"><span class="sub">Your habit data is never attached.</span><button class="btn" id="fbClose">Close</button></div></div></div>`;
+  const close=()=>{root.innerHTML=""};document.getElementById("scrim").addEventListener("click",ev=>{if(ev.target.id==="scrim")close()});document.getElementById("fbClose").onclick=close;
+  root.querySelectorAll("[data-fbt]").forEach(b=>b.onclick=()=>{type=b.dataset.fbt;root.querySelectorAll("[data-fbt]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.fbt===type));document.getElementById("fbMail").href=mail()});
+  document.getElementById("fbMail").addEventListener("click",()=>setTimeout(close,400));
+  document.getElementById("fbCopy").onclick=async()=>{const btn=document.getElementById("fbCopy");try{await navigator.clipboard.writeText(FEEDBACK_EMAIL);btn.textContent="Copied ✓"}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById("fbAddr"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);btn.textContent="Selected"}};
+  document.addEventListener("keydown",function k(ev){if(ev.key==="Escape"){close();document.removeEventListener("keydown",k)}});
+  document.getElementById("fbMail").focus()}
+
 /* ---------- tour (coach marks) ---------- */
 const TOUR=[
  {v:"today",sel:"#hero",t:"Your day at a glance",b:()=>on("schedule")?"The ring fills as you tick habits. The Now card shows the block you're in and what comes next.":"The ring fills as you tick habits, and shows how many are left for today."},
@@ -1255,12 +1282,13 @@ const TOUR=[
 let TS=null;
 function tourSteps(){return TOUR.filter(s=>!s.mod||on(s.mod))}
 function startTour(){closeTour();const sh=document.getElementById("sheetroot");if(sh)sh.innerHTML="";TS={i:0,steps:tourSteps()};showTourStep()}
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&TS)endTour()});
 function closeTour(){const t=document.getElementById("tour");if(t)t.remove();window.removeEventListener("resize",placeTour);TS=null}
 function endTour(){setMeta({tour:Date.now()});closeTour();if(view()!=="today")location.hash="#today"}
 function showTourStep(){const st=TS.steps[TS.i];if(view()!==st.v){location.hash="#"+st.v;route()}
   const root=document.getElementById("overlayroot");let t=document.getElementById("tour");
   if(!t){t=document.createElement("div");t.id="tour";t.className="tour";t.innerHTML=`<div class="spot"></div><div class="bubble" role="dialog" aria-modal="true" aria-labelledby="tr-t"></div>`;root.appendChild(t);
-    t.addEventListener("keydown",ev=>{if(ev.key==="Escape")endTour()});window.addEventListener("resize",placeTour)}
+    window.addEventListener("resize",placeTour)}
   const last=TS.i===TS.steps.length-1;
   t.querySelector(".bubble").innerHTML=`<span class="lbl">${TS.i+1} of ${TS.steps.length}</span><h3 id="tr-t">${st.t}</h3><p>${st.b()}</p><div class="row"><button class="btn ghost" id="trSkip">${last?"":"Skip tour"}</button><span class="nav">${TS.i?`<button class="btn" id="trBack">Back</button>`:""}<button class="btn primary" id="trNext">${last?"Done":"Next"}</button></span></div>`;
   t.querySelector("#trSkip").onclick=endTour;if(last)t.querySelector("#trSkip").style.visibility="hidden";
@@ -1290,6 +1318,7 @@ window.addEventListener("hashchange",route);
 setInterval(()=>{if(view()==="today"&&!overlayOpen()&&!(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)))renderToday()},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){dayView=null;if(!overlayOpen())rerender()}});
 document.addEventListener("click",ev=>{const b=ev.target.closest&&ev.target.closest("[data-gm]");if(b&&view()==="stats"){CFG.manual=CFG.manual||{};CFG.manual[b.dataset.gm]=(+CFG.manual[b.dataset.gm]||0)+1;touchCfg();renderStats()}});
+document.getElementById("fbBtn").addEventListener("click",()=>{if(!document.getElementById("wizard"))openFeedback()});
 document.getElementById("helpBtn").addEventListener("click",()=>{if(!document.getElementById("wizard"))startTour()});
 normalize(DEFAULT_CFG);normalize(CFG);lastLife=game().life;applyModsChrome();route();startSync();
 if(!CFG.setupDone)openWizard(false);

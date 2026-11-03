@@ -2,7 +2,7 @@
 // The personal app lives on the same origin (fernbuilds-labs.github.io), and the Cache API is shared per origin,
 // so this worker only ever touches caches that start with PREFIX, and it re-saves itself if its cache goes missing.
 const PREFIX = "levelup-public-";
-const VERSION = "levelup-public-v1";
+const VERSION = "levelup-public-v2";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 const precache = () => caches.open(VERSION).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: "reload" }))));
 self.addEventListener("install", e => {
